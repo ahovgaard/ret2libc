@@ -6,26 +6,38 @@
 #include <sys/types.h>
 #include <unistd.h>
 
-void evil(char *file) {
 
-    int fd = open(file, O_RDONLY);
+void evil(char *file)
+{
+	int fd = open(file, O_RDONLY);
 
-    void *ptr = mmap(0, 4096, PROT_READ | PROT_WRITE,
-            MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
+	void *ptr = mmap(0, 4096, PROT_READ | PROT_WRITE,
+		MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
 
-    int read_count = read(fd, ptr, 4096);
+	int read_count = read(fd, ptr, 4096);
 
-    printf("%s\n", ptr);
+	printf("%s\n", ptr);
+
+	close(fd);
 }
 
+void well_made_code(char* file, int len)
+{
+	char buf[32];
+	int fd = open(file, O_RDONLY);
+	read(fd, buf, len);
+	close(fd);
+}
 
-int main(int argc, char *argv[]) {
+int main(int argc, char *argv[])
+{
+	evil("funny.txt");
 
-    evil("funny.txt");
+	int size = strtol(argv[2], NULL, 10);
 
-    char buf[32];
+	well_made_code(argv[1], size);
 
-    strcpy(buf, argv[1]);
+	printf("What a great program\n");
 
-    return 0;
+	return 0;
 }
