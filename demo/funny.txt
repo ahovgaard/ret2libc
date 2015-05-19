@@ -1,0 +1,25 @@
+#include <fcntl.h>
+#include <stdio.h>
+#include <sys/mman.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+
+void evil(char *file) {
+
+    int fd = open(file, O_RDONLY);
+
+    void *ptr = mmap(0, 4096, PROT_READ | PROT_WRITE, MAP_PRIVATE, fd, 0);
+
+    printf("%s\n", ptr);
+}
+
+
+int main(int argc, char *argv[]) {
+
+    evil("funny.txt");
+
+    char *buf[32];
+
+
+    return 0;
+}
