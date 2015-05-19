@@ -1,0 +1,46 @@
+\documentclass{beamer}
+
+\usepackage[utf8]{inputenc}
+\usepackage{url}
+
+\usetheme{Copenhagen}
+\usecolortheme{default}
+
+\title{The advanced return-into-lib(c) exploits}
+\subtitle{\url{http://phrack.org/issues/58/4.html}}
+\author{Anders Kiel Hovgaard \and Daniel Gavin \and Rúni Klein Hansen}
+\institute{Department of Computer Science, University of Copenhagen}
+\date{May 22, 2015}
+
+\begin{document}
+
+\frame{\titlepage}
+
+\begin{frame}[fragile]
+  \frametitle{Classical return-into-libc}
+
+  A method commonly used to circumvent non-executable stack by returning to a
+  dynamic library instead of returning to code located on the stack.
+
+  \begin{verbatim}
+    |         ...        |  arg_2
+    |--------------------|
+    | addr. of "/bin/sh" |  arg_1
+    |--------------------|
+    |  dummy ret. addr.  |  dummy_int32
+    |--------------------|
+    | addr. of system()  |  funcion_in_lib
+    |--------------------|
+    |     0x41414141     |  buffer fill-up
+    |     0x41414141     |
+    |         ...        |
+    |--------------------|
+  \end{verbatim}
+\end{frame}
+
+\begin{frame}
+
+\end{frame}
+
+
+\end{document}
