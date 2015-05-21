@@ -52,6 +52,9 @@
   \end{verbatim}
 \end{frame}
 
+\begin{frame}
+
+\end{frame}
 
 \section{Chaining return-into-libc calls} % Anders
 
@@ -276,8 +279,42 @@
 
 
 \section{PaX features}  % Rúni
+\subsection{What is PaX?}
+\begin{frame}
+\frametitle{What is PaX?}
+\begin{itemize}
+\item Implementing read and write but not execution privileges to IA-32 where no
+such differentiation exists.
+\item A programmatic way to prevent buffer overflows by making part of the stack
+non executable.
+\end{itemize}
+\end{frame}
 
+\subsection{ASLR}
+\begin{frame}
+\frametitle{Adress Space Layout Randomization}
+\hspace{25mm}\texttt{CONFIG\_PAX\_RANDMMAP}
+\\
+If activated the first library will be mmaped to
 
+\hspace{10mm}\texttt{0x40000000+random*4k}
+
+and stack at
+
+\hspace{10mm}\texttt{0xc0000000-random*16}
+
+Random is a unsigned 16-bit integer fetched via \texttt{get\_random\_bytes()} which
+yields cryptographically strong data.
+
+\end{frame}
+
+\begin{frame}
+\begin{itemize}
+\item Library has a new address at each boot
+\item 
+\end{itemize}
+
+\end{frame}
 
 
 
@@ -287,9 +324,9 @@
 \frametitle{Procedure linkage table(PLT)}
 
  \begin{itemize}
-    \item PLT's purpose is to provide a level of indirection when calling external library functions.
+    \item PLT's purpose is to provide a level of indirection when calling shared library functions.
     \item PLT is lazy binding.
-    \item PLT ensures that code remains read-only, and that is because all external functions are not directly called from code.
+    \item PLT ensures that code remains read-only, and that is because all shared functions are not directly called from code.
     \item PLT is in the code segment, and the addresses that PLT modifies are in the global offset table(GOT).
   \end{itemize}
 
@@ -420,7 +457,7 @@ This is the simplified explanation of how the algorithm works.
 \end{frame}
 
 \begin{frame}[fragile]
-\frametitle{dl-runtime-resolve() algorithm}
+\frametitle{dl-resolve() algorithm}
  \begin{itemize}
     \item Algorithm has enough information to retrieve the address for the function, and caches it in reloc$->$r\_offset and sym$->$st\_value.
 
@@ -432,10 +469,10 @@ This is the simplified explanation of how the algorithm works.
 \end{frame}
 
 \begin{frame}[fragile]
-\frametitle{Exploiting dl-runtime-resolve()}
+\frametitle{Exploiting dl-resolve()}
 
 \begin{itemize}
-\item How can we exploit dl-runtime-resolve()?
+\item How can we exploit dl-resolve()?
 
 \item We could prepare an appropriate Elf32\_Sym and Elf32\_Rel, and calculate the reloc\_offset to fit with where Elf32\_Rel is placed.
 
@@ -457,7 +494,7 @@ correct reloc\_offset.
 \end{frame}
 
 \begin{frame}[fragile]
-\frametitle{Exploiting dl-runtime-resolve()}
+\frametitle{Exploiting dl-resolve()}
 We need to ensure that the structures are placed correctly in memory.
 \begin{verbatim}
 Elf32_Rel reloc.
