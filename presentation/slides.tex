@@ -16,7 +16,7 @@
 
 \frame{\titlepage}
 
-\section{Classical return-into-libc} % Anders
+\section{Classical return-into-libc}
 
 \begin{frame}[fragile]
   \frametitle{Classical return-into-libc}
@@ -46,6 +46,38 @@
 \subsection{Problems with the classical approach}
 
 \begin{frame}
+  \frametitle{Problems with the classical approach}
+  \begin{itemize}
+    \item Can't generally call another argument taking function after the firt
+      call, since the first argument will be the new return address etc.
+      Often necessary, e.g. for:
+      \begin{itemize}
+        \item regaining privileges with \texttt{setuid}
+        \item mapping a known memory location with \texttt{mmap}
+      \end{itemize}
+
+    \item The overflow can typically not contain \texttt{NUL} bytes and that
+      limits the arguments to the function.
+      \begin{itemize}
+        \item \texttt{mmap(0x414140\textcolor{red}{00}, \dots)} \hfill
+          (pagesize = 0x1000)
+      \end{itemize}
+  \end{itemize}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Chaining return-into-libc calls}
+  Two methods for chaining multiple function calls:
+  \begin{itemize}
+    \item ``\texttt{esp} lifting'' method
+    \item frame faking
+  \end{itemize}
+\end{frame}
+
+\subsection{``\texttt{esp} lifting'' method}
+
+\begin{frame}
+  \frametitle{``\texttt{esp} lifting'' method}
 
 \end{frame}
 
