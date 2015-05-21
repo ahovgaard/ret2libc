@@ -244,7 +244,7 @@ This is the simplified explanation of how the algorithm works.
 \begin{itemize}
 \item How can we exploit dl-runtime-resolve()?
 
-\item We could prepare a appropriate Elf32\_Sym and Elf32\_Rel, and calculate the reloc\_offset to fit with where Elf32\_Rel is placed.
+\item We could prepare an appropriate Elf32\_Sym and Elf32\_Rel, and calculate the reloc\_offset to fit with where Elf32\_Rel is placed.
  
 \item We would then call .plt start with the
 correct reloc\_offset.
