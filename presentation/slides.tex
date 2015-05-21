@@ -53,7 +53,10 @@
 \end{frame}
 
 \begin{frame}
-
+\frametitle{Return address}
+A graceful exit or crash and burn.\\
+\vspace{5mm}
+Choosing a offset instead of a ``random'' return address, and the consequences.
 \end{frame}
 
 \section{Chaining return-into-libc calls} % Anders
@@ -283,37 +286,81 @@
 \begin{frame}
 \frametitle{What is PaX?}
 \begin{itemize}
-\item Implementing read and write but not execution privileges to IA-32 where no
+\item Implementing read, write and execution privileges to IA-32 where no
 such differentiation exists.
 \item A programmatic way to prevent buffer overflows by making part of the stack
-non executable.
+non executable (data part).
 \end{itemize}
+\vspace{4mm}
+In short:\\
+\vspace{2mm}
+\hspace{6mm}``To prevent executing code that was smuggled into data areas''
+\end{frame}
+
+\begin{frame}[fragile]
+\frametitle{Privileges on the stack}
+Originally PaX only tried to implemented execution privileges, but due to
+\texttt{MMAP} and the privilege \texttt{PROT\_EXEC} more is necessary and using
+\texttt{strcpy(address, shellcode)} one can get shellcode to run even with PaX
+and thus gain access to the stack.
 \end{frame}
 
 \subsection{ASLR}
 \begin{frame}
-\frametitle{Adress Space Layout Randomization}
-\hspace{25mm}\texttt{CONFIG\_PAX\_RANDMMAP}
-\\
-If activated the first library will be mmaped to
-
+\frametitle{Address Space Layout Randomization}
+The first loaded library is loaded at:\\
+\vspace{1mm}
 \hspace{10mm}\texttt{0x40000000+random*4k}
-
-and stack at
-
-\hspace{10mm}\texttt{0xc0000000-random*16}
-
+\vspace{1mm}
+and the next library will be mmaped after the first and so on\\
+\vspace{3mm}
+And stack is at the following place:\\
+\vspace{1mm}
+\hspace{10mm}\texttt{0xc0000000-random*16}\\
+\vspace{3mm}
 Random is a unsigned 16-bit integer fetched via \texttt{get\_random\_bytes()} which
 yields cryptographically strong data.
+\end{frame}
 
+\begin{frame}[fragile]
+\frametitle{Example of address randomization}
+Different address for each new program:
+\begin{lstlisting}
+7fb8d95fd000-7fb8d961f000 r-xp 00000000 08:02 134376
+      /usr/lib/ld-2.21.so
+7fb8d981e000-7fb8d981f000 r--p 00021000 08:02 134376
+      /usr/lib/ld-2.21.so
+7fb8d981f000-7fb8d9820000 rw-p 00022000 08:02 134376
+      /usr/lib/ld-2.21.so
+
+
+7ff6b2f69000-7ff6b2f8b000 r-xp 00000000 08:02 134376
+      /usr/lib/ld-2.21.so
+7ff6b318a000-7ff6b318b000 r--p 00021000 08:02 134376
+      /usr/lib/ld-2.21.so
+7ff6b318b000-7ff6b318c000 rw-p 00022000 08:02 134376
+      /usr/lib/ld-2.21.so
+\end{lstlisting}
 \end{frame}
 
 \begin{frame}
+If \texttt{CONFIG\_PAX\_RANDMMAP} is activated the follo
 \begin{itemize}
-\item Library has a new address at each boot
-\item 
+\item The first loaded library has a new address at each boot
+\item Functions are randomized each time a binary is run
 \end{itemize}
+\end{frame}
 
+\subsection{Drawbacks/failures of PaX}
+\begin{frame}
+\frametitle{Drawbacks and Failures of PaX}
+The drawbacks/failures of PaX
+\begin{itemize}
+\item Local access to /proc/\$\$/maps - Restrict access
+\item Bruteforce the way to libc - Reactive guards after logged attacks
+\item Information leak due to formatting
+\item Using position-dependant functions i.e. cannot be mmaped
+\end{itemize}
 \end{frame}
 
 
