@@ -287,9 +287,9 @@
 \frametitle{Procedure linkage table(PLT)}
 
  \begin{itemize}
-    \item PLT's purpose is to provide a level of indirection when calling external library functions.
+    \item PLT's purpose is to provide a level of indirection when calling shared library functions.
     \item PLT is lazy binding.
-    \item PLT ensures that code remains read-only, and that is because all external functions are not directly called from code.
+    \item PLT ensures that code remains read-only, and that is because all shared functions are not directly called from code.
     \item PLT is in the code segment, and the addresses that PLT modifies are in the global offset table(GOT).
   \end{itemize}
 
@@ -420,7 +420,7 @@ This is the simplified explanation of how the algorithm works.
 \end{frame}
 
 \begin{frame}[fragile]
-\frametitle{dl-runtime-resolve() algorithm}
+\frametitle{dl-resolve() algorithm}
  \begin{itemize}
     \item Algorithm has enough information to retrieve the address for the function, and caches it in reloc$->$r\_offset and sym$->$st\_value.
 
@@ -432,10 +432,10 @@ This is the simplified explanation of how the algorithm works.
 \end{frame}
 
 \begin{frame}[fragile]
-\frametitle{Exploiting dl-runtime-resolve()}
+\frametitle{Exploiting dl-resolve()}
 
 \begin{itemize}
-\item How can we exploit dl-runtime-resolve()?
+\item How can we exploit dl-resolve()?
 
 \item We could prepare an appropriate Elf32\_Sym and Elf32\_Rel, and calculate the reloc\_offset to fit with where Elf32\_Rel is placed.
 
@@ -457,7 +457,7 @@ correct reloc\_offset.
 \end{frame}
 
 \begin{frame}[fragile]
-\frametitle{Exploiting dl-runtime-resolve()}
+\frametitle{Exploiting dl-resolve()}
 We need to ensure that the structures are placed correctly in memory.
 \begin{verbatim}
 Elf32_Rel reloc.
