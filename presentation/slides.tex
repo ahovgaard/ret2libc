@@ -1,7 +1,19 @@
-\documentclass{beamer}
+\documentclass[10pt]{beamer}
 
 \usepackage[utf8]{inputenc}
 \usepackage{url}
+\usepackage{listings}
+\usepackage{drawstack}
+
+\lstset{
+  basicstyle=\ttfamily\scriptsize,
+  showtabs=false,
+  showspaces=false,
+  showstringspaces=false,
+  columns=fixed,
+  showstringspaces=false,
+  extendedchars=true,
+}
 
 \usetheme{Copenhagen}
 \usecolortheme{default}
@@ -16,7 +28,7 @@
 
 \frame{\titlepage}
 
-\section{Classical return-into-libc}
+\section{Classical return-into-libc}  % Rúni
 
 \begin{frame}[fragile]
   \frametitle{Classical return-into-libc}
@@ -45,22 +57,44 @@
 
 \subsection{Problems with the classical approach}
 
-\begin{frame}
+\begin{frame}[fragile]
   \frametitle{Problems with the classical approach}
   \begin{itemize}
-    \item Can't generally call another argument taking function after the firt
-      call, since the first argument will be the new return address etc.
-      Often necessary, e.g. for:
+    \item Not possible to call another funtion, which takes arguments, after
+      the first call, since the first argument will be the new return address
+      etc.
+  \end{itemize}
+
+  \begin{lstlisting}
+  -------------------------------------------------------
+  | buffer fill-up | f1 | f2 | arg_1/f2_ret | arg_2 | ...
+  -------------------------------------------------------
+  \end{lstlisting}
+
+  \begin{itemize}
+    \item Multiple function calls often necessary, e.g. for:
       \begin{itemize}
         \item regaining privileges with \texttt{setuid}
         \item mapping a known memory location with \texttt{mmap}
+        \item copying or reading code to mapped location
+        \item returning to mapped location
+        \item etc.
       \end{itemize}
+  \end{itemize}
 
+\end{frame}
+
+\begin{frame}
+  \frametitle{Problems with the classical approach}
+  \begin{itemize}
     \item The overflow can typically not contain \texttt{NUL} bytes and that
-      limits the arguments to the function.
+      limits the arguments to the function.\\
+      \hfill\\
+      Example:
       \begin{itemize}
-        \item \texttt{mmap(0x414140\textcolor{red}{00}, \dots)} \hfill
-          (pagesize = 0x1000)
+        \item \texttt{mmap(0x414140\textcolor{red}{00},
+          0x20\textcolor{red}{00}, \dots)}
+          \hfill (pagesize = 0x1000)
       \end{itemize}
   \end{itemize}
 \end{frame}
@@ -76,10 +110,99 @@
 
 \subsection{``\texttt{esp} lifting'' method}
 
-\begin{frame}
+\begin{frame}[fragile,shrink]
   \frametitle{``\texttt{esp} lifting'' method}
 
+  \begin{columns}[c]
+  \column{0.5\textwidth}
+
+  \begin{itemize}
+    \item Designed for attacking binaries compiled with the
+      \texttt{-fomit-frame-pointer} flag.
+
+    \item Using gadgets that ``lift'' \texttt{ESP} to clean up arguments on the
+      stack in between function calls.
+  \end{itemize}
+
+  \begin{lstlisting}
+  eplg:
+      add esp, SIZE
+      ret
+  \end{lstlisting}
+
+  \begin{lstlisting}
+  eplg:
+      pop ebx
+      pop esi
+      pop edi
+      pop ebp
+      ret
+  \end{lstlisting}
+
+  \column{0.5\textwidth}
+
+  \begin{drawstack}[scale=0.54]
+    \cell{f2\_args}
+    \cell{dummy}
+    \cell{f2}
+    \startframe
+    \cell{(padding)}
+    \cell{f1\_argn}
+    \cell{\dots}
+    \cell{f1\_arg2}
+    \cell{f1\_arg1}
+    \finishframe{{\scriptsize SIZE}\phantom{XXX}}
+    \cell{epilogue}
+    \cell{f1}
+    \cell{0x41414141}
+  \end{drawstack}
+
+  %\begin{lstlisting}
+  %|        ...         |
+  %|--------------------|
+  %|       f2_args      |
+  %|--------------------|
+  %|  dummy ret. addr.  |
+  %|--------------------|
+  %|         f2         |
+  %|--------------------| <------\
+  %|      (padding)     |        |
+  %|--------------------|        |
+  %|       f1_argn      |        |
+  %|--------------------|
+  %|         ...        |    VARS_SIZE
+  %|--------------------|
+  %|       f1_arg2      |        |
+  %|--------------------|        |
+  %|       f1_arg1      |        |
+  %|--------------------| <------/
+  %|      epilogue      |
+  %|--------------------|
+  %|         f1         |
+  %|--------------------|
+  %|     0x41414141     |  buffer fill-up
+  %|         ...        |
+  %\end{lstlisting}
+  \end{columns}
 \end{frame}
+
+\subsection{frame faking}
+
+\begin{frame}[fragile]
+  \frametitle{frame faking}
+  Designed to attack binaries compiled \emph{without} the
+  \texttt{-fomit-frame-pointer} flag.
+
+  \begin{lstlisting}
+  leaveret:
+        leave
+        ret
+  \end{lstlisting}
+
+  \texttt{ESP} lifting epilogues might still be available with GCC.
+
+\end{frame}
+
 
 
 \section{PaX features}  % Rúni
