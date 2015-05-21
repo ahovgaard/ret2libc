@@ -162,33 +162,6 @@ Choosing a offset instead of a ``random'' return address, and the consequences.
     \cell{f1}
     \cell{0x41414141}
   \end{drawstack}
-
-  %\begin{lstlisting}
-  %|        ...         |
-  %|--------------------|
-  %|       f2_args      |
-  %|--------------------|
-  %|  dummy ret. addr.  |
-  %|--------------------|
-  %|         f2         |
-  %|--------------------| <------\
-  %|      (padding)     |        |
-  %|--------------------|        |
-  %|       f1_argn      |        |
-  %|--------------------|
-  %|         ...        |    VARS_SIZE
-  %|--------------------|
-  %|       f1_arg2      |        |
-  %|--------------------|        |
-  %|       f1_arg1      |        |
-  %|--------------------| <------/
-  %|      epilogue      |
-  %|--------------------|
-  %|         f1         |
-  %|--------------------|
-  %|     0x41414141     |  buffer fill-up
-  %|         ...        |
-  %\end{lstlisting}
   \end{columns}
 \end{frame}
 
@@ -249,10 +222,6 @@ Choosing a offset instead of a ``random'' return address, and the consequences.
       \end{itemize}
 
     \item An information leak of \texttt{ESP}.
-
-    \item A long chain of \texttt{ret} calls (a ``ROP sled'') can precede the
-      fake frames and \texttt{EBP} can be overwritten with an address in that
-      sled.
   \end{itemize}
 \end{frame}
 
